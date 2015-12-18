@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<title>
+			Triangle
+		</title>
+	</head>
+	<body>
+		<canvas id="c" width="200" height="200"/>
+		<script type="text/javascript">
+			var ctx = document.getElementById("c").getContext("2d");
+			var vertices = [	{ x: 100, y: 27 },
+								{ x: 0, y: 200 },
+								{ x: 200, y: 200 } ];
+			var current = { x: 100, y: 27 };
+			for (var i = 0; i < 100000; i++)
+			{
+				var randomVertex = vertices[Math.floor(Math.random() * 3)];
+				current = { x: (current.x + randomVertex.x) / 2, y: (current.y + randomVertex.y) / 2};
+				ctx.fillRect(current.x, current.y, 1, 1);
+			}
+		</script>
+	</body>
+</html>
