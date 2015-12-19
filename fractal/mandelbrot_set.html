@@ -1,0 +1,110 @@
+<html>
+  <head>
+    <title>
+      Mandelbrot Set
+    </title>
+  </head>
+  <body>
+    <canvas id="c" width="2000", height="2000" style="position: absolute; left: 0; top: 0; z-index:1"></canvas>
+    <canvas id="c2" width="2000", height="2000" style="position: absolute; left: 0; top: 0; z-index:2" onmousemove="mouseMoveAction()"></canvas>
+    <script type="text/javascript">
+      
+      function isInCircle(x, y)
+      {
+        return x * x + y * y < 4
+      }
+      
+      // (x + yi) * (x + yi) = x * x - y * y + (2 * x * y)i
+      function square (x, y)
+      {
+        return { x : x * x - y * y, y: 2 * x * y };
+      }
+      
+      var SIZE = 2000;
+      var CONVERTER = (SIZE / 4) * 1.0;
+      var LIMIT = 32;
+      
+      // to keep points on the canvas to be redrawn in interactive phase
+      var xValues = [];
+      var yValues = [];      
+      var outer;
+      var inner;
+      for(outer = 0; outer < SIZE; outer++)
+      {
+        xValues[outer] = [];
+        yValues[outer] = [];
+        for(inner = 0; inner < SIZE; inner++)
+        {
+          xValues[outer][inner] = [];
+          yValues[outer][inner] = [];
+        }
+      }
+      
+      var x, y;    // location on canvas
+      var iter;    // iterations
+      var cX, cY;  // keep track of c in z = z^2 + c
+      var zX, zY;  // keep track of z in z = z^2 + c
+      var squared; // to keep z^2
+      var color;   // to determine the coloring in the canvas
+      
+      var ctx = document.getElementById("c").getContext("2d");
+      
+      for (x = 0; x < SIZE; x++)
+      {
+        for (y = 0; y < SIZE; y++)
+        {
+          // convert location into complex number c
+          cX = (x / CONVERTER) - 2;
+          cY = 2 - (y / CONVERTER);
+          
+          // determine initial z
+          zX = cX;
+          zY = cY;
+          
+          for (iter = 0; iter < LIMIT; iter++)
+          {
+            if(!isInCircle(zX, zY))
+            {
+              break;
+            }
+            
+            // calculate next z
+            squared = square(zX, zY);
+            zX = squared.x + cX;
+            zY = squared.y + cY;
+            
+            // register canvas location of z in the arrays
+            xValues[x][y][iter] = Math.floor((zX + 2) * CONVERTER);
+            yValues[x][y][iter] = Math.floor((2 - zY) * CONVERTER);
+          }
+        
+          color = 255 - Math.floor((LIMIT-iter) * (255/LIMIT));
+          ctx.fillStyle = "rgb(" + color + "," + color + "," + color + ")";
+          ctx.fillRect(x, y, 1, 1);
+        }
+      }
+      
+      // interactive mode
+      var ctx2 = document.getElementById("c2").getContext("2d");
+      ctx2.strokeStyle = "#00ffff";
+      
+      function mouseMoveAction()
+      {
+        var e = window.event;
+        var x = e.pageX;
+        var y = e.pageY;
+        
+        ctx2.clearRect(0, 0, SIZE, SIZE);
+        ctx2.beginPath();
+        ctx2.moveTo(x, y);
+        var counter;
+        for (counter = 0; counter < xValues[x][y].length; counter++)
+        {
+          ctx2.lineTo(xValues[x][y][counter], yValues[x][y][counter]);
+          ctx2.moveTo(xValues[x][y][counter], yValues[x][y][counter]);
+        }
+        ctx2.stroke();
+      }
+    </script>
+  </body>
+</html>
